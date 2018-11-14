@@ -19,6 +19,8 @@ env:
     - TEST_DIR=simple-safety
 
 script:
-    - if [ "$TRAVIS_RUST_VERSION" == "stable" ]; then cd $TEST_DIR && cargo fmt --all -- --check; fi
-    - cd $TEST_DIR && cargo build --verbose && cargo test --verbose
+    - cd $TEST_DIR
+    - if [ "$TRAVIS_RUST_VERSION" == "stable" ]; then cargo fmt --all -- --check; fi
+    - cargo build --verbose 
+    - cargo test --verbose
 
