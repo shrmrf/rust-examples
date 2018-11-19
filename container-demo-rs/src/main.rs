@@ -1,3 +1,6 @@
+extern crate nix;
+
+use nix::sched::{self, CloneFlags};
 use std::env;
 
 fn print_usage() {
@@ -8,9 +11,8 @@ fn print_usage() {
 fn main() {
     let args: Vec<String> = env::args().collect();
 
+    let arguments = &args[1..];
     if args[1] == "run" {
-        let arguments = &args[1..];
-        println!("run main process here, with args: {:?}", &arguments[1..]);
         run(&arguments[1..]);
     } else if args[1] == "child" {
         println!("run child process here");
