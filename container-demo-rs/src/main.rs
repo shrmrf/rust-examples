@@ -1,3 +1,19 @@
+use std::env;
+
+fn print_usage() {
+    println!("usage: progname run <command>");
+    println!("    Example: progname run ls");
+}
+
 fn main() {
-    println!("Hello, world!");
+    let args: Vec<String> = env::args().collect();
+
+    if args[1] == "run" {
+        let arguments = &args[1..];
+        println!("run main process here, with args: {:?}", arguments);
+    } else if args[1] == "child" {
+        println!("run child process here");
+    } else {
+        print_usage();
+    }
 }
