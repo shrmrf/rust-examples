@@ -17,6 +17,7 @@ before_script:
 
 env:
     - TEST_DIR=simple-safety
+    - TEST_DIR=container-demo-rs
 
 script:
     - cd $TEST_DIR
