@@ -30,6 +30,9 @@ fn run(run_args: &[String]) {
     nix::sched::unshare(
         CloneFlags::CLONE_NEWUTS | CloneFlags::CLONE_NEWPID | CloneFlags::CLONE_NEWNS,
     );
+
+    // Requires `root`
+    nix::unistd::sethostname("container").expect("hostname set failed");
     Command::new("/proc/self/exe")
         .stdout(Stdio::inherit())
         .args(&["child", "abc"])
@@ -40,7 +43,8 @@ fn run(run_args: &[String]) {
 fn child(run_args: &[String]) {
     println!("Arguments: {:?}", run_args);
 
-    //nix::unistd::sethostname("container").expect("hostname set failed");
+    nix::unistd::chroot("/home/taimoor/dev/rust-examples/container-demo-rs/rootfs");
+    nix::unistd::chdir("/");
     Command::new("/bin/ls")
         .stdout(Stdio::inherit())
         .args(&["-l", "-a"])
