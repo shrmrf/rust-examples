@@ -18,6 +18,7 @@ fn main() {
         run(&arguments[..]);
     } else if args[1] == "child" {
         println!("run child process here");
+        child(&arguments[..]);
     } else {
         print_usage();
     }
@@ -26,9 +27,23 @@ fn main() {
 fn run(run_args: &[String]) {
     println!("Arguments: {:?}", run_args);
 
+    nix::sched::unshare(
+        CloneFlags::CLONE_NEWUTS | CloneFlags::CLONE_NEWPID | CloneFlags::CLONE_NEWNS,
+    );
     Command::new("/proc/self/exe")
         .stdout(Stdio::inherit())
         .args(&["child", "abc"])
+        .output()
+        .expect("failed to execute");
+}
+
+fn child(run_args: &[String]) {
+    println!("Arguments: {:?}", run_args);
+
+    //nix::unistd::sethostname("container").expect("hostname set failed");
+    Command::new("/bin/ls")
+        .stdout(Stdio::inherit())
+        .args(&["-l", "-a"])
         .output()
         .expect("failed to execute");
 }
