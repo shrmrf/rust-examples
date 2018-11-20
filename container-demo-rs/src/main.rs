@@ -46,7 +46,7 @@ fn child(run_args: &[String]) {
 
     nix::unistd::sethostname("container").expect("hostname set failed");
 
-    nix::unistd::chroot("/vagrant/ubuntu-rootfs");
+    nix::unistd::chroot("/ubuntu-rootfs");
     nix::unistd::chdir("/");
 
     let status = Command::new("bash")
