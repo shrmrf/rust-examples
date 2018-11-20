@@ -1,6 +1,6 @@
 extern crate nix;
 
-use nix::sched::{self, CloneFlags};
+use nix::sched::CloneFlags;
 use std::env;
 use std::process::{Command, Stdio};
 
@@ -32,6 +32,7 @@ fn run(run_args: &[String]) {
     );
 
     Command::new("/proc/self/exe")
+        .env_clear()
         .stdout(Stdio::inherit())
         .stdin(Stdio::inherit())
         .stderr(Stdio::inherit())
@@ -47,19 +48,13 @@ fn child(run_args: &[String]) {
 
     nix::unistd::chroot("/vagrant/ubuntu-rootfs");
     nix::unistd::chdir("/");
-    
+
     let status = Command::new("bash")
-                    .stdout(Stdio::inherit())
-                    .stdin(Stdio::inherit())
-                    .stderr(Stdio::inherit())
-                    .status()
-                    .unwrap();
-                    //.expect("failed to execute");
+        .stdout(Stdio::inherit())
+        .stdin(Stdio::inherit())
+        .stderr(Stdio::inherit())
+        .status()
+        .expect("failed to execute");
 
     assert!(status.success());
-    //Command::new("/bin/ls")
-    //    .stdout(Stdio::inherit())
-    //    .args(&["-l", "-a"])
-    //    .output()
-    //    .expect("failed to execute");
 }
