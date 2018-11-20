@@ -12,12 +12,10 @@ fn print_usage() {
 fn main() {
     let args: Vec<String> = env::args().collect();
 
-    if args[1] == "run" {
-        run(&args[2..]);
-    } else if args[1] == "child" {
-        child(&args[2..]);
-    } else {
-        print_usage();
+    match args[1].as_ref() {
+        "run" => run(&args[2..]),
+        "child" => child(&args[2..]),
+        _ => print_usage(),
     }
 }
 
@@ -33,11 +31,12 @@ fn run(run_args: &[String]) {
         .env_clear()
         .args(&child_args)
         .status()
-        .expect("failed to execute");
+        .expect("failed to execute child process");
 }
 
 fn child(run_args: &[String]) {
     println!("Arguments: {:?}", run_args);
+
     nix::unistd::sethostname("container").expect("hostname set failed");
     nix::unistd::chroot("/ubuntu-rootfs").expect("chroot failed");
     nix::unistd::chdir("/").expect("chdir failed");
@@ -45,5 +44,5 @@ fn child(run_args: &[String]) {
     Command::new(&run_args[0])
         .args(&run_args[1..])
         .status()
-        .expect("failed to execute");
+        .expect("failed to execute container");
 }
