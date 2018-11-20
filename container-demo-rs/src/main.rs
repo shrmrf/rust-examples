@@ -2,7 +2,7 @@ extern crate nix;
 
 use nix::sched::CloneFlags;
 use std::env;
-use std::process::{Command, Stdio};
+use std::process::Command;
 
 fn print_usage() {
     println!("usage: progname run <command>");
@@ -12,49 +12,38 @@ fn print_usage() {
 fn main() {
     let args: Vec<String> = env::args().collect();
 
-    println!("{:?}", args);
-    let arguments = &args[1..];
     if args[1] == "run" {
-        run(&arguments[..]);
+        run(&args[2..]);
     } else if args[1] == "child" {
-        println!("run child process here");
-        child(&arguments[..]);
+        child(&args[2..]);
     } else {
         print_usage();
     }
 }
 
 fn run(run_args: &[String]) {
-    println!("Arguments: {:?}", run_args);
-
     nix::sched::unshare(
         CloneFlags::CLONE_NEWUTS | CloneFlags::CLONE_NEWPID | CloneFlags::CLONE_NEWNS,
-    );
+    ).expect("unshare failed");
+
+    let mut child_args: Vec<String> = vec!["child".to_string()];
+    child_args.extend_from_slice(run_args);
 
     Command::new("/proc/self/exe")
         .env_clear()
-        .stdout(Stdio::inherit())
-        .stdin(Stdio::inherit())
-        .stderr(Stdio::inherit())
-        .args(&["child", "abc"])
+        .args(&child_args)
         .status()
         .expect("failed to execute");
 }
 
 fn child(run_args: &[String]) {
     println!("Arguments: {:?}", run_args);
-
     nix::unistd::sethostname("container").expect("hostname set failed");
+    nix::unistd::chroot("/ubuntu-rootfs").expect("chroot failed");
+    nix::unistd::chdir("/").expect("chdir failed");
 
-    nix::unistd::chroot("/ubuntu-rootfs");
-    nix::unistd::chdir("/");
-
-    let status = Command::new("bash")
-        .stdout(Stdio::inherit())
-        .stdin(Stdio::inherit())
-        .stderr(Stdio::inherit())
+    Command::new(&run_args[0])
+        .args(&run_args[1..])
         .status()
         .expect("failed to execute");
-
-    assert!(status.success());
 }
