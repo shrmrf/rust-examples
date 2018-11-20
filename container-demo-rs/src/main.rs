@@ -33,8 +33,10 @@ fn run(run_args: &[String]) {
 
     Command::new("/proc/self/exe")
         .stdout(Stdio::inherit())
+        .stdin(Stdio::inherit())
+        .stderr(Stdio::inherit())
         .args(&["child", "abc"])
-        .output()
+        .status()
         .expect("failed to execute");
 }
 
@@ -43,11 +45,21 @@ fn child(run_args: &[String]) {
 
     nix::unistd::sethostname("container").expect("hostname set failed");
 
-    nix::unistd::chroot("/home/taimoor/dev/rust-examples/container-demo-rs/rootfs");
+    nix::unistd::chroot("/vagrant/ubuntu-rootfs");
     nix::unistd::chdir("/");
-    Command::new("/bin/ls")
-        .stdout(Stdio::inherit())
-        .args(&["-l", "-a"])
-        .output()
-        .expect("failed to execute");
+    
+    let status = Command::new("bash")
+                    .stdout(Stdio::inherit())
+                    .stdin(Stdio::inherit())
+                    .stderr(Stdio::inherit())
+                    .status()
+                    .unwrap();
+                    //.expect("failed to execute");
+
+    assert!(status.success());
+    //Command::new("/bin/ls")
+    //    .stdout(Stdio::inherit())
+    //    .args(&["-l", "-a"])
+    //    .output()
+    //    .expect("failed to execute");
 }
