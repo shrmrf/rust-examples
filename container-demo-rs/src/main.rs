@@ -20,6 +20,7 @@ fn main() {
 }
 
 fn run(run_args: &[String]) {
+    println!("PID: {}", nix::unistd::getpid());
     nix::sched::unshare(
         CloneFlags::CLONE_NEWUTS | CloneFlags::CLONE_NEWPID | CloneFlags::CLONE_NEWNS,
     ).expect("unshare failed");
@@ -35,6 +36,7 @@ fn run(run_args: &[String]) {
 }
 
 fn child(run_args: &[String]) {
+    println!("PID: {}", nix::unistd::getpid());
     println!("Arguments: {:?}", run_args);
 
     nix::unistd::sethostname("container").expect("hostname set failed");
